@@ -1,0 +1,60 @@
+name: Dev Deployment from GitHub to AWS and Azure
+
+"on":
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Build and push to ACR
+      - name: Docker Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: aidshop.azurecr.io
+          username: ${{ secrets.ACR_USERNAME_DEV }}
+          password: ${{ secrets.ACR_PASSWORD_DEV }}
+
+      - name: Build and Push Docker Image to ACRR
+        run: |
+          docker build -f Dockerfile.dev . -t aidshop.azurecr.io/ai-preprocess:${{ github.sha }}
+          docker push aidshop.azurecr.io/ai-preprocess:${{ github.sha }}
+
+  
+  update-manifest-stage:
+    runs-on: ubuntu-latest
+    needs: build-image
+
+    steps:
+      - name: Checkout ai-k8s-dev repo
+        uses: actions/checkout@v2
+        with:
+          repository: redshop-team/ai-k8s-dev
+          ref: "main"
+          token: ${{ secrets.G_TOKEN }}
+
+      - name: Setup Git config
+        run: |
+          git config --global user.email "sohanmock@gmail.com"
+          git config --global user.name "shahhriarsohan"
+
+      - name: Update image tag in ai-preprocess.yaml
+        run: |
+          sed -i "s#\(aidshop.azurecr.io/ai-preprocess:\)[^\"']*#\1${{ github.sha }}#g" ai-preprocess.yaml
+
+      - name: Commit and push changes
+        run: |
+          git add ai-preprocess.yaml
+          git commit -m "Update ai-preprocess image to aidshop.azurecr.io/ai-preprocess:${{ github.sha }}" || echo "No changes"
+          git pull origin main --rebase
+          git push origin main
