@@ -9,7 +9,6 @@ from langgraph_sdk import get_client, get_sync_client
 from confluent_kafka import Consumer , Producer
 from kafka_config import read_config, consumer, producer, postprocess_topic, message_processing_activity_topic
 
-langgraph_client = get_sync_client(url="http://167.99.31.177", api_key="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")
 
 def process_message(body: str):
     """
