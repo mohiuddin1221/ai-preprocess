@@ -25,3 +25,17 @@ jobs:
       - name: Push Docker image to Azure Container Registry
         run:
           docker push WhiteshopAcr.azurecr.io/ai-preprocess:${{github.sha}}
+
+  # Deploy to Azure Web App
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Azure webapp deploy
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{secrets.AZURE_WEBAPP}}
+          images: WhiteshopAcr.azurecr.io/ai-preprocess:${{github.sha}}
+          slot-name: production
+
+
