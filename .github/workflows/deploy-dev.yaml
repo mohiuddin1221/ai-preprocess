@@ -54,7 +54,7 @@ jobs:
         with:
           repository: mohiuddin1221/k8s
           ref: "main"
-          token: ${{ secrets.G_TOKEN }}
+          # token: ${{ secrets.G_TOKEN }}
 
       - name: Setup Git config
         run: |
