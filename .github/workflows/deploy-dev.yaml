@@ -67,13 +67,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          git remote set-url origin https://${{ secrets.G_TOKEN }}@github.com/mohiuddin1221/k8s.git
           git add ai-preprocess.yaml
           git commit -m "Update ai-preprocess image to WhiteshopAcr.azurecr.io/ai-preprocess:${{ github.sha }}" || echo "No changes"
           git pull origin main --rebase
           git push origin main
-          
-        #git remote set-url origin https://${{ secrets.G_TOKEN }}@github.com/mohiuddin1221/k8s.git
-        #git add ai-preprocess.yaml
-        #git commit -m "Update ai-preprocess image to WhiteshopAcr.azurecr.io/ai-preprocess:${{ github.sha }}" || echo "No changes"
-        #git pull origin main --rebase
-        #git push origin main
